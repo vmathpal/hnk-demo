@@ -1,0 +1,66 @@
+data "azurerm_resource_group" "RG" {
+  name     = var.RG
+}
+
+data "azurerm_virtual_network" "spoke1-vnet" {
+  name                = var.spoke1-vnet
+  resource_group_name = data.azurerm_resource_group.RG.name
+}
+
+data "azurerm_subnet" "spoke1-subnet" {
+  name                 = var.spoke1-subnet
+  virtual_network_name = data.azurerm_virtual_network.spoke1-vnet.name
+  resource_group_name  = data.azurerm_resource_group.RG.name
+}
+output "subnet_id" {
+  value = data.azurerm_subnet.spoke1-subnet.id
+}
+
+output "vnet-id" {
+  value = data.azurerm_virtual_network.spoke1-vnet.id
+}
+
+output "RG-id" {
+  value = data.azurerm_resource_group.RG.id
+  }
+
+
+resource "azurerm_network_interface" "winvm-nic" {
+  name                = var.winvm-nic
+  location            = data.azurerm_resource_group.RG.location
+  resource_group_name = data.azurerm_resource_group.RG.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = data.azurerm_subnet.spoke1-subnet.id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+output "nic-id" {
+  value = azurerm_network_interface.vm-nic.id
+  }
+
+resource "azurerm_windows_virtual_machine" "Win-VM" {
+  name                = var.Win-VM[2]
+  resource_group_name = data.azurerm_resource_group.RG.name
+  location            = data.azurerm_resource_group.RG.location
+  size                = "Standard_F2"
+  admin_username      = var.admin_username
+  admin_password      = var.admin_password
+  network_interface_ids = [
+    azurerm_network_interface.winvm-nic.id,
+  ]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = var.source_image_reference[1].publisher
+    offer     = var.source_image_reference[1].offer
+    sku       = var.source_image_reference[1].sku
+    version   = var.source_image_reference[1].version
+  }
+}
