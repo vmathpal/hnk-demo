@@ -7,7 +7,7 @@
 *.log
 
 # Directories
-.terraform/*
+~/new/.terraform/*
 .vagrant/
 
 # SSH Keys
