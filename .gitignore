@@ -2,7 +2,7 @@
 *.tfstate
 *.tfstate.backup
 *.tfstate.lock.info
-
+.terraform/providers/registry.terraform.io/hashicorp/azurerm/2.79.1/linux_amd64/terraform-provider-azurerm_v2.79.1_x5
 # logs
 *.log
 
